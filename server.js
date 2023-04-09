@@ -1,26 +1,41 @@
+// Getting the express module
 const express = require('express')
+
+// Assigning the express object to variable app
 const app = express()
+
+// Getting the mongo module with MongoClient object
 const MongoClient = require('mongodb').MongoClient
+
+// Defining port 
 const PORT = 2121
+
+// Getting dotenv module to define environment settings
 require('dotenv').config()
 
-
+// defining database connection and database name
 let db,
     dbConnectionStr = process.env.DB_STRING,
     dbName = 'todo'
 
+// Using MongoClient object to connect to the mongo database
 MongoClient.connect(dbConnectionStr, { useUnifiedTopology: true })
     .then(client => {
         console.log(`Connected to ${dbName} Database`)
         db = client.db(dbName)
     })
     
+// Setting up ejs as the template view engine     
 app.set('view engine', 'ejs')
+
+// Files inside the public folder will be treated as static
 app.use(express.static('public'))
+
+// To convert raw data from requests to readable JSON data
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
-
+// api for root (/)
 app.get('/',async (request, response)=>{
     const todoItems = await db.collection('todos').find().toArray()
     const itemsLeft = await db.collection('todos').countDocuments({completed: false})
